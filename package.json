@@ -1,0 +1,26 @@
+{
+  "name": "geojon-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "preprocess": "node scripts/preprocess.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "setup": "npm install && node scripts/preprocess.mjs"
+  },
+  "dependencies": {
+    "@geoman-io/leaflet-geoman-free": "^2.19.3",
+    "html2canvas": "^1.4.1",
+    "leaflet": "^1.9.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "shapefile": "^0.6.6",
+    "vite": "^5.4.0"
+  }
+}

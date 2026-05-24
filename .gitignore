@@ -1,0 +1,9 @@
+node_modules/
+dist/
+
+# Arquivo com credenciais — nunca commitar
+iniciar.md
+
+# Dados brutos — o GeoJSON gerado (public/data/) já vai commitado
+cavidades.zip
+shapefile/
