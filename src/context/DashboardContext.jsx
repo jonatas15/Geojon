@@ -9,7 +9,7 @@ export function DashboardProvider({ children }) {
   const [error, setError] = useState(null);
   const [theme, setTheme] = useState('light');
   const [visibleGrades, setVisibleGrades] = useState(new Set(Object.keys(GRADE_CONFIG)));
-  const [selectedGrade, setSelectedGradeRaw] = useState(null);
+  const [selectedGrades, setSelectedGradesRaw] = useState(new Set());
   const [selectedFeatureId, setSelectedFeatureIdRaw] = useState(null);
   const [clickLatLng, setClickLatLng] = useState(null);
 
@@ -40,30 +40,43 @@ export function DashboardProvider({ children }) {
     return f?.properties?.grau_de_po ?? null;
   }, [selectedFeatureId, geojsonData]);
 
-  const activeGrade = selectedGrade ?? selectedFeatureGrade;
+  // Grades efetivamente em destaque: feature selecionada tem prioridade
+  const activeGrades = useMemo(() => {
+    if (selectedFeatureId !== null && selectedFeatureGrade) {
+      return new Set([selectedFeatureGrade]);
+    }
+    return selectedGrades;
+  }, [selectedFeatureId, selectedFeatureGrade, selectedGrades]);
 
   const totalVisible = useMemo(() => {
     if (!geojsonData) return 0;
     return geojsonData.features.filter(f => visibleGrades.has(f.properties.grau_de_po)).length;
   }, [geojsonData, visibleGrades]);
 
-  const setSelectedGrade = (gradeOrFn) => {
-    setSelectedGradeRaw(gradeOrFn);
+  // Alterna inclusão/exclusão do grau na seleção múltipla
+  const setSelectedGrade = (grade) => {
+    if (grade === null) {
+      setSelectedGradesRaw(new Set());
+    } else {
+      setSelectedGradesRaw(prev => {
+        const next = new Set(prev);
+        next.has(grade) ? next.delete(grade) : next.add(grade);
+        return next;
+      });
+    }
     setSelectedFeatureIdRaw(null);
     setClickLatLng(null);
   };
 
-  // Chamado pela sidebar (sem latlng) — fecha o popup
   const setSelectedFeatureId = (id) => {
     setSelectedFeatureIdRaw(id);
-    setSelectedGradeRaw(null);
+    setSelectedGradesRaw(new Set());
     if (id === null) setClickLatLng(null);
   };
 
-  // Chamado pelo clique no mapa — registra posição para o popup
   const selectFeature = (id, latlng) => {
     setSelectedFeatureIdRaw(id);
-    setSelectedGradeRaw(null);
+    setSelectedGradesRaw(new Set());
     setClickLatLng(id !== null ? latlng : null);
   };
 
@@ -86,10 +99,10 @@ export function DashboardProvider({ children }) {
       geojsonData, loading, error,
       theme, toggleTheme,
       visibleGrades, toggleGrade, toggleAll,
-      selectedGrade, setSelectedGrade,
+      selectedGrades, setSelectedGrade,
       selectedFeatureId, setSelectedFeatureId, selectFeature,
       clickLatLng,
-      selectedFeatureGrade, activeGrade,
+      selectedFeatureGrade, activeGrades,
       stats, totalVisible,
     }}>
       {children}

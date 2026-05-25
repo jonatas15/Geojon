@@ -90,8 +90,8 @@ function FitBounds({ data }) {
 
 function GeoJSONLayer({ data }) {
   const {
-    visibleGrades, selectedGrade, selectedFeatureId,
-    setSelectedGrade, selectFeature,
+    visibleGrades, selectedGrades, selectedFeatureId,
+    selectFeature,
   } = useDashboard();
   const map = useMap();
 
@@ -100,7 +100,7 @@ function GeoJSONLayer({ data }) {
 
   // Mutable ref holds latest state so event handlers never stale-close
   const stateRef = useRef({});
-  stateRef.current = { visibleGrades, selectedGrade, selectedFeatureId };
+  stateRef.current = { visibleGrades, selectedGrades, selectedFeatureId };
 
   // Ref estável para selectFeature — evita recriar onEachFeature a cada render do contexto
   const selectFeatureRef = useRef(selectFeature);
@@ -116,7 +116,7 @@ function GeoJSONLayer({ data }) {
   }, [map]);
 
   const featureStyle = useCallback((feature, hover = false) => {
-    const { visibleGrades, selectedGrade, selectedFeatureId } = stateRef.current;
+    const { visibleGrades, selectedGrades, selectedFeatureId } = stateRef.current;
     const grade = feature.properties.grau_de_po;
     const cfg = GRADE_CONFIG[grade] ?? { color: '#666', fillColor: '#999' };
     const visible = visibleGrades.has(grade);
@@ -126,17 +126,17 @@ function GeoJSONLayer({ data }) {
     if (selectedFeatureId !== null) {
       highlighted = feature.id === selectedFeatureId;
       dimmed = !highlighted;
-    } else if (selectedGrade !== null) {
-      highlighted = grade === selectedGrade;
+    } else if (selectedGrades.size > 0) {
+      highlighted = selectedGrades.has(grade);
       dimmed = !highlighted;
     }
 
     return {
-      color: highlighted ? '#fff' : cfg.color,
+      color: cfg.fillColor,
       fillColor: cfg.fillColor,
-      weight: highlighted ? 3 : hover ? 2 : 1,
-      opacity: visible ? 1 : 0,
-      fillOpacity: !visible ? 0 : highlighted ? 0.92 : dimmed ? 0.18 : hover ? 0.78 : 0.62,
+      weight: 0,
+      opacity: 0,
+      fillOpacity: !visible ? 0 : highlighted ? 0.93 : dimmed ? 0.05 : hover ? 0.82 : 0.65,
     };
   }, []);
 
@@ -149,7 +149,7 @@ function GeoJSONLayer({ data }) {
     geoJsonRef.current.eachLayer(layer => {
       layer.setStyle(featureStyleRef.current(layer.feature));
     });
-  }, [visibleGrades, selectedGrade, selectedFeatureId]);
+  }, [visibleGrades, selectedGrades, selectedFeatureId]);
 
   const onEachFeature = useCallback((feature, layer) => {
     layer.on({
@@ -181,7 +181,7 @@ function GeoJSONLayer({ data }) {
   const initialStyle = useCallback((feature) => {
     const grade = feature.properties.grau_de_po;
     const cfg = GRADE_CONFIG[grade] ?? { color: '#666', fillColor: '#999' };
-    return { color: cfg.color, fillColor: cfg.fillColor, weight: 1, fillOpacity: 0.62, opacity: 1 };
+    return { color: cfg.fillColor, fillColor: cfg.fillColor, weight: 0, opacity: 0, fillOpacity: 0.65 };
   }, []);
 
   return (

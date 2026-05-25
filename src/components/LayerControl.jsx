@@ -4,20 +4,11 @@ import { GRADE_CONFIG, GRADE_ORDER } from '../config/grades';
 export default function LayerControl() {
   const {
     visibleGrades, toggleGrade, toggleAll,
-    stats, activeGrade, setSelectedGrade, setSelectedFeatureId,
+    stats, activeGrades, setSelectedGrade,
   } = useDashboard();
 
   const allVisible = GRADE_ORDER.every(g => visibleGrades.has(g));
   const noneVisible = GRADE_ORDER.every(g => !visibleGrades.has(g));
-
-  const handleGradeClick = (grade) => {
-    if (activeGrade === grade) {
-      setSelectedGrade(null);
-      setSelectedFeatureId(null);
-    } else {
-      setSelectedGrade(grade);
-    }
-  };
 
   return (
     <div className="layer-control">
@@ -40,13 +31,13 @@ export default function LayerControl() {
         const cfg = GRADE_CONFIG[grade];
         const count = stats[grade] ?? 0;
         const visible = visibleGrades.has(grade);
-        const isSelected = activeGrade === grade;
+        const isSelected = activeGrades.has(grade);
 
         return (
           <div
             key={grade}
             className={`layer-item ${isSelected ? 'selected' : ''} ${!visible ? 'faded' : ''}`}
-            onClick={() => handleGradeClick(grade)}
+            onClick={() => setSelectedGrade(grade)}
             title="Clique para destacar no mapa e nos gráficos"
           >
             <label

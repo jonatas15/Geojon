@@ -23,24 +23,24 @@ const SHORT_LABELS = {
 };
 
 function useChartData() {
-  const { stats, visibleGrades, activeGrade } = useDashboard();
+  const { stats, visibleGrades, activeGrades } = useDashboard();
   return GRADE_ORDER.map(grade => ({
     grade,
     short: SHORT_LABELS[grade] ?? grade,
     count: stats[grade] ?? 0,
     color: GRADE_CONFIG[grade]?.fillColor ?? '#999',
     visible: visibleGrades.has(grade),
-    active: activeGrade === grade,
-    dimmed: activeGrade !== null && activeGrade !== grade,
+    active: activeGrades.has(grade),
+    dimmed: activeGrades.size > 0 && !activeGrades.has(grade),
   }));
 }
 
 export function PieChartView() {
-  const { setSelectedGrade, activeGrade } = useDashboard();
+  const { setSelectedGrade } = useDashboard();
   const data = useChartData().filter(d => d.count > 0);
 
   const handleClick = (entry) => {
-    setSelectedGrade(prev => prev === entry.grade ? null : entry.grade);
+    setSelectedGrade(entry.grade);
   };
 
   const renderLabel = ({ cx, cy, midAngle, outerRadius, percent, grade }) => {
@@ -99,7 +99,7 @@ export function BarChartView() {
   const data = useChartData();
 
   const handleClick = (barData) => {
-    setSelectedGrade(prev => prev === barData.grade ? null : barData.grade);
+    setSelectedGrade(barData.grade);
   };
 
   return (
